@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: java-assignment
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Build and run tests with coverage
+        run: mvn -B -ntp clean verify
+
+      - name: Upload coverage report (site/jacoco)
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-site-jacoco
+          path: java-assignment/target/site/jacoco/
+
+      - name: Upload coverage report (target/jacoco-report)
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-target-jacoco-report
+          path: java-assignment/target/jacoco-report/
+
+      - name: Upload surefire reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: java-assignment/target/surefire-reports/
