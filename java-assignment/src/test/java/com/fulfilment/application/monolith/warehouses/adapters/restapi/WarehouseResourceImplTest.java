@@ -61,6 +61,18 @@ public class WarehouseResourceImplTest {
 
     @Test
     @Transactional
+    public void testGetAWarehouseUnitByIDReturnsWarehouse() {
+        var result = resource.getAWarehouseUnitByID("MWH.012");
+        assertNotNull(result);
+        assertEquals("MWH.012", result.getBusinessUnitCode());
+        assertEquals("AMSTERDAM-001", result.getLocation());
+        assertEquals(50, result.getCapacity());
+        assertEquals(5, result.getStock());
+    }
+
+
+    @Test
+    @Transactional
     public void testArchiveAWarehouseUnitByIDThrowsForNotFound() {
         assertThrows(IllegalArgumentException.class, () -> resource.archiveAWarehouseUnitByID("NOT_FOUND"));
     }

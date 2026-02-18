@@ -106,4 +106,57 @@ public class ReplaceWarehouseUseCaseTest {
 		assertTrue(withBu.stream().anyMatch(w -> "AMSTERDAM-002".equals(w.location) && Integer.valueOf(60).equals(w.capacity) && Integer.valueOf(20).equals(w.stock)));
 		assertTrue(withBu.stream().anyMatch(w -> w.archivedAt != null));
 	}
+
+	@Test
+	@Transactional
+	public void testReplaceThrowsWhenDestinationAtMaxWarehouses() {
+		// Seed a different warehouse occupying HELMOND-001 (maxNumberOfWarehouses = 1)
+		Warehouse occupant = new Warehouse();
+		occupant.businessUnitCode = "HELMOND_OCCUPANT_BU";
+		occupant.location = "HELMOND-001";
+		occupant.capacity = 20;
+		occupant.stock = 5;
+		warehouseStore.create(occupant);
+
+		// Old warehouse to replace (in another location)
+		Warehouse old = new Warehouse();
+		old.businessUnitCode = "REPLACE_DEST_MAX_BU";
+		old.location = "AMSTERDAM-001";
+		old.capacity = 40;
+		old.stock = 10;
+		warehouseStore.create(old);
+
+		// Attempt to replace into HELMOND-001 should fail due to max warehouses
+		Warehouse newWarehouse = new Warehouse();
+		newWarehouse.businessUnitCode = "REPLACE_DEST_MAX_BU";
+		newWarehouse.location = "HELMOND-001";
+		newWarehouse.capacity = 20;
+		newWarehouse.stock = 10;
+		assertThrows(IllegalArgumentException.class, () -> useCase.replace(newWarehouse));
+	}
+
+	@Test
+	@Transactional
+	public void testReplaceThrowsWhenDestinationCapacityExceeded() {
+		Warehouse occupant = new Warehouse();
+		occupant.businessUnitCode = "HELMOND_CAP_OCCUPANT_BU";
+		occupant.location = "HELMOND-001";
+		occupant.capacity = 30;
+		occupant.stock = 5;
+		warehouseStore.create(occupant);
+
+		Warehouse old = new Warehouse();
+		old.businessUnitCode = "REPLACE_DEST_CAP_BU";
+		old.location = "AMSTERDAM-001";
+		old.capacity = 40;
+		old.stock = 10;
+		warehouseStore.create(old);
+
+		Warehouse newWarehouse = new Warehouse();
+		newWarehouse.businessUnitCode = "REPLACE_DEST_CAP_BU";
+		newWarehouse.location = "HELMOND-001";
+		newWarehouse.capacity = 16;
+		newWarehouse.stock = 10;
+		assertThrows(IllegalArgumentException.class, () -> useCase.replace(newWarehouse));
+	}
 }

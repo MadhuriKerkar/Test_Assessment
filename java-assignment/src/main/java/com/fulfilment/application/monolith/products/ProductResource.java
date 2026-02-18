@@ -37,7 +37,7 @@ public class ProductResource {
 
   @GET
   @Path("{id}")
-  public Product getSingle(Long id) {
+  public Product getSingle(@jakarta.ws.rs.PathParam("id") Long id) {
     Product entity = productRepository.findById(id);
     if (entity == null) {
       throw new WebApplicationException("Product with id of " + id + " does not exist.", 404);
@@ -59,7 +59,7 @@ public class ProductResource {
   @PUT
   @Path("{id}")
   @Transactional
-  public Product update(Long id, Product product) {
+  public Product update(@jakarta.ws.rs.PathParam("id") Long id, Product product) {
     if (product.name == null) {
       throw new WebApplicationException("Product Name was not set on request.", 422);
     }
@@ -83,7 +83,7 @@ public class ProductResource {
   @DELETE
   @Path("{id}")
   @Transactional
-  public Response delete(Long id) {
+  public Response delete(@jakarta.ws.rs.PathParam("id") Long id) {
     Product entity = productRepository.findById(id);
     if (entity == null) {
       throw new WebApplicationException("Product with id of " + id + " does not exist.", 404);

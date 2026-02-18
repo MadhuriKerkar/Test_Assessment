@@ -60,6 +60,54 @@ public class CreateWarehouseUseCaseTest {
 
 	@Test
 	@Transactional
+	public void testCreateThrowsWhenLocationAtMaxWarehouses() {
+		// HELMOND-001 allows max 1 active warehouse
+		Warehouse occupant = new Warehouse();
+		occupant.businessUnitCode = "HELMOND_MAX_OCCUPANT_BU";
+		occupant.location = "HELMOND-001";
+		occupant.capacity = 20;
+		occupant.stock = 5;
+		warehouseStore.create(occupant);
+
+		Warehouse another = new Warehouse();
+		another.businessUnitCode = "HELMOND_MAX_OVERFLOW_BU";
+		another.location = "HELMOND-001";
+		another.capacity = 10;
+		another.stock = 5;
+
+		assertThrows(IllegalArgumentException.class, () -> useCase.create(another));
+	}
+
+	@Test
+	@Transactional
+	public void testCreateThrowsWhenAggregateCapacityExceedsLocationMax() {
+		// AMSTERDAM-002: maxNumberOfWarehouses=3, maxCapacity=75
+		Warehouse w1 = new Warehouse();
+		w1.businessUnitCode = "AMS2_CAP_W1_BU";
+		w1.location = "AMSTERDAM-002";
+		w1.capacity = 40;
+		w1.stock = 10;
+		warehouseStore.create(w1);
+
+		Warehouse w2 = new Warehouse();
+		w2.businessUnitCode = "AMS2_CAP_W2_BU";
+		w2.location = "AMSTERDAM-002";
+		w2.capacity = 30;
+		w2.stock = 10;
+		warehouseStore.create(w2);
+
+		// Attempt to create third pushes totalCapacity to 76 (>75)
+		Warehouse w3 = new Warehouse();
+		w3.businessUnitCode = "AMS2_CAP_W3_BU";
+		w3.location = "AMSTERDAM-002";
+		w3.capacity = 6;
+		w3.stock = 5;
+
+		assertThrows(IllegalArgumentException.class, () -> useCase.create(w3));
+	}
+
+	@Test
+	@Transactional
 	public void testCreateSucceeds() {
 		Warehouse warehouse = new Warehouse();
 		warehouse.businessUnitCode = "CREATE_OK_BU";

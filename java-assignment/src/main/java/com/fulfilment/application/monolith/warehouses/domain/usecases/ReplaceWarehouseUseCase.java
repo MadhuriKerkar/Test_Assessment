@@ -33,6 +33,16 @@ public class ReplaceWarehouseUseCase implements ReplaceWarehouseOperation {
       throw new IllegalArgumentException("Invalid location");
     }
 
+    // Warehouse Creation Feasibility at destination location
+    long activeAtDestination = warehouseStore.getAll().stream()
+        .filter(w -> w.archivedAt == null)
+        .filter(w -> w.location != null && w.location.equals(newWarehouse.location))
+        .filter(w -> !w.businessUnitCode.equals(oldWarehouse.businessUnitCode))
+        .count();
+    if (activeAtDestination >= location.maxNumberOfWarehouses) {
+      throw new IllegalArgumentException("Maximum number of warehouses reached for this location");
+    }
+
     // Capacity Accommodation
     if (newWarehouse.capacity != null && oldWarehouse.stock != null && newWarehouse.capacity < oldWarehouse.stock) {
       throw new IllegalArgumentException("New warehouse capacity cannot accommodate old stock");
@@ -41,6 +51,17 @@ public class ReplaceWarehouseUseCase implements ReplaceWarehouseOperation {
     // Stock Matching
     if (newWarehouse.stock == null || !newWarehouse.stock.equals(oldWarehouse.stock)) {
       throw new IllegalArgumentException("Stock of new warehouse must match old warehouse");
+    }
+
+    // Location Max Capacity aggregate
+    int totalCapacityAtDestination = warehouseStore.getAll().stream()
+        .filter(w -> w.archivedAt == null)
+        .filter(w -> w.location != null && w.location.equals(newWarehouse.location))
+        .filter(w -> !w.businessUnitCode.equals(oldWarehouse.businessUnitCode))
+        .mapToInt(w -> w.capacity != null ? w.capacity : 0)
+        .sum();
+    if (newWarehouse.capacity != null && newWarehouse.capacity + totalCapacityAtDestination > location.maxCapacity) {
+      throw new IllegalArgumentException("Warehouse capacity exceeds location maximum");
     }
 
     // Archive old warehouse
