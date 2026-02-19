@@ -31,8 +31,6 @@ public class StoreResource {
   @Inject LegacyStoreManagerGateway legacyStoreManagerGateway;
   @Inject Event<StoreEvent> storeEvent;
 
-  private static final Logger LOGGER = Logger.getLogger(StoreResource.class.getName());
-
   @GET
   public List<Store> get() {
     return Store.listAll(Sort.by("name"));

@@ -7,6 +7,8 @@ import jakarta.inject.Inject;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
+
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -111,15 +113,15 @@ public class CreateWarehouseUseCaseTest {
 	public void testCreateSucceeds() {
 		Warehouse warehouse = new Warehouse();
 		warehouse.businessUnitCode = "CREATE_OK_BU";
-		warehouse.location = "HELMOND-001";
+		warehouse.location = "ZWOLLE-002";
 		warehouse.capacity = 20;
 		warehouse.stock = 10;
-
+		
 		assertDoesNotThrow(() -> useCase.create(warehouse));
 
 		Warehouse found = warehouseStore.findByBusinessUnitCode("CREATE_OK_BU");
 		assertNotNull(found);
-		assertEquals("HELMOND-001", found.location);
+		assertEquals("ZWOLLE-002", found.location);
 		assertEquals(20, found.capacity);
 		assertEquals(10, found.stock);
 		assertNotNull(found.createdAt);

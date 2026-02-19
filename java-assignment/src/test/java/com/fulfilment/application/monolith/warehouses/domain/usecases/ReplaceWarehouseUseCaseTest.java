@@ -94,7 +94,7 @@ public class ReplaceWarehouseUseCaseTest {
 
 		Warehouse newWarehouse = new Warehouse();
 		newWarehouse.businessUnitCode = "REPLACE_OK_BU";
-		newWarehouse.location = "AMSTERDAM-002";
+		newWarehouse.location = "EINDHOVEN-001";
 		newWarehouse.capacity = 60;
 		newWarehouse.stock = 20;
 
@@ -103,7 +103,7 @@ public class ReplaceWarehouseUseCaseTest {
 		var withBu = warehouseStore.getAll().stream()
 			.filter(w -> "REPLACE_OK_BU".equals(w.businessUnitCode))
 			.toList();
-		assertTrue(withBu.stream().anyMatch(w -> "AMSTERDAM-002".equals(w.location) && Integer.valueOf(60).equals(w.capacity) && Integer.valueOf(20).equals(w.stock)));
+		assertTrue(withBu.stream().anyMatch(w -> "EINDHOVEN-001".equals(w.location) && Integer.valueOf(60).equals(w.capacity) && Integer.valueOf(20).equals(w.stock)));
 		assertTrue(withBu.stream().anyMatch(w -> w.archivedAt != null));
 	}
 
