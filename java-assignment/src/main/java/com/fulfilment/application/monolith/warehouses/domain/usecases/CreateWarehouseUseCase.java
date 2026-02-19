@@ -32,17 +32,16 @@ public class CreateWarehouseUseCase implements CreateWarehouseOperation {
       throw new IllegalArgumentException("Invalid location");
     }
 
-    // Warehouse Creation Feasibility
-    long count = warehouseStore.getAll().stream()
+    // Optimize: collect filtered warehouses once
+    var activeAtLocation = warehouseStore.getAll().stream()
         .filter(w -> w.location.equals(warehouse.location) && w.archivedAt == null)
-        .count();
-    if (count >= location.maxNumberOfWarehouses) {
+        .toList();
+
+    if (activeAtLocation.size() >= location.maxNumberOfWarehouses) {
       throw new IllegalArgumentException("Maximum number of warehouses reached for this location");
     }
 
-    // Capacity and Stock Validation
-    int totalCapacity = warehouseStore.getAll().stream()
-        .filter(w -> w.location.equals(warehouse.location) && w.archivedAt == null)
+    int totalCapacity = activeAtLocation.stream()
         .mapToInt(w -> w.capacity != null ? w.capacity : 0)
         .sum();
     if (warehouse.capacity + totalCapacity > location.maxCapacity) {
